@@ -30,14 +30,16 @@ hit=pygame.mixer.Sound('hit.wav')
 collision=pygame.mixer.Sound('collision.wav')
 pygame.mixer.music.load('music.wav')
 pygame.mixer.music.play(-1)
+display_time = True
 
 def main():
+    start_time = time.time()
+    
 # initial position of rects
     playerOneMove=[70,70]
     playerTwoMove=[70,520]
 
 
-    time=0
     count=10 #to limit sound effect affect collision
 
     #image
@@ -76,7 +78,7 @@ def main():
                 hitList.append(tile)
         return hitList
 
-    def moveOne(rectOne,movement,tiles1,tiles3):
+    def moveOne(rectOne,movementOne,tiles1,tiles3):
         tiles=tiles1+tiles3
         rectOne.x+=movementOne[0]
         hitList = collisionTest(rectOne,tiles)
@@ -93,7 +95,7 @@ def main():
             elif movementOne[1] < 0:
                 rectOne.top = tile.bottom
         return rectOne        
-    def moveTwo(rectTwo,movement,tiles1,tiles2):
+    def moveTwo(rectTwo,movementTwo,tiles1,tiles2):
         tiles=tiles1+tiles2
         rectTwo.x+=movementTwo[0]
         hitList = collisionTest(rectTwo,tiles)
@@ -111,16 +113,15 @@ def main():
                 rectTwo.top = tile.bottom
         return rectTwo
     enter=True
-    timeRun=True #to stop time runnnin after collision
+    timeRun=True #to stop time running after collision
     displayTime=True
  
 # LOOP
     while enter:
-        
-        if timeRun:
-            time+=1
-        realTime=time*0.0397
-        realTime=int(realTime)
+        cur_time = time.time()- start_time
+        minute = cur_time//60
+        sec = cur_time%60
+        sec = int(sec)
         movementOne=[0,0]
         movementTwo=[0,0]
         canvas.fill(black)
@@ -156,6 +157,9 @@ def main():
                 if not playerOneRect.colliderect(playerTwoRect):
                     pygame.mixer.Sound.play(rectCross)    
         if playerOneRect.colliderect(playerTwoRect):    #check collision
+            if displayTime:
+                time_played = time.time() - start_time
+    
             canMove=False
             moveUp=False
             moveRight=False
@@ -175,15 +179,18 @@ def main():
             fontSize=70
             font=pygame.font.Font(fontName, fontSize)
             canvas.blit(endScreen,(0,0))
-            minute=realTime//60
-            sec=realTime%60
+            # Time at end
+            #conversion
+            
+            minute = time_played//60
+            sec = time_played%60
+            sec = round(sec,2)
             text=font.render('Evader survived for: '+str(minute)+' minutes '+str(sec)+" seconds",True,white,black)
-            text2=font.render('Press SPACE',True,green,black)
+            text2=font.render('Press Enter',True,green,black)
             text21=font.render('To play again',True,green,black)
 
             text3=font.render('Press esc',True,red,black)
             text31=font.render('To quit',True,red,black)
-
             canvas.blit(text,(550,850))
             canvas.blit(text2,(850,1000))
             canvas.blit(text21,(800,1100))
@@ -192,9 +199,11 @@ def main():
             canvas.blit(text31,(1650,1100))
 
             timeRun=False
-            if event.type==KEYDOWN and event.key==K_SPACE:
+            if event.type==KEYDOWN and event.key==K_RETURN:
+                print("space pressed")
                 main()
             if event.type==KEYDOWN and event.key==K_ESCAPE:
+                # main()
                 pygame.quit()
                 sys.exit()
         if moveUp==True:
@@ -222,8 +231,7 @@ def main():
         fontName='Arial'
         fontSize=65
         font=pygame.font.SysFont(fontName, fontSize)
-        minute=realTime//60
-        sec=realTime%60
+        # time display
         text=font.render(str(minute)+':'+str(sec),True,white,black)
         if displayTime:
             canvas.blit(text,(1400,0))
